@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 env:
   AWS_ROLE_ARN: arn:aws:iam::060795927700:role/rupali-github-action
-  S3_BUCKET: rupali-github-action
+  S3_BUCKET: my-cloudfront-1
   CLOUDFRONT_DIST_ID: E3CJ0QK2XBC9L0
 
 jobs:
