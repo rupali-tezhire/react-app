@@ -3,13 +3,18 @@ name: REACT-APP
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
+env:
+  AWS_ROLE_ARN: arn:aws:iam::060795927700:role/rupali-github-action
+  S3_BUCKET: rupali-github-action
+  CLOUDFRONT_DIST_ID: E3CJ0QK2XBC9L0
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - uses: actions/checkout@v4
 
@@ -23,8 +28,15 @@ jobs:
 
     - name: Build
       run: npm run build
-    - name: upload dist
-      uses: actions/upload-artifact@v4
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
       with:
-        name: dist
-        path: dist
+        role-to-assume: ${{ env.AWS_ROLE_ARN }}
+        aws-region: ap-south-1
+
+    - name: Deploy s3
+      run: aws s3 sync dist s3://${{ env.S3_BUCKET }} --delete
+
+    - name: Invalidate CloudFront Cache
+      run: aws cloudfront create-invalidation --distribution-id ${{ env.CLOUDFRONT_DIST_ID }} --paths "/*"
